@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
 
-// --- TİP VE VERİ TANIMLAMALARI ---
 type ImageOption = {
     id: string
     url: string
@@ -14,15 +13,14 @@ type RoundData = {
     options: ImageOption[]
 }
 
-// Not: Gerçek projende buradaki URL'leri kendi resimlerinle değiştirmelisin.
 const GAME_DATA: RoundData[] = [
     {
         id: 1,
         theme: 'Doğa Manzarası',
         options: [
             { id: 'r1-real', isReal: true, url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80' },
-            { id: 'r1-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1620662776606-c87e671b48cb?w=400&q=80' },
-            { id: 'r1-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1618423771880-2c67e889a773?w=400&q=80' },
+            { id: 'r1-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&q=80' },
+            { id: 'r1-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80' },
         ]
     },
     {
@@ -39,7 +37,7 @@ const GAME_DATA: RoundData[] = [
         theme: 'Spor Arabalar',
         options: [
             { id: 'r3-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=400&q=80' },
-            { id: 'r3-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1503376763036-066120622c74?w=400&q=80' },
+            { id: 'r3-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80' },
             { id: 'r3-real', isReal: true, url: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=400&q=80' },
         ]
     },
@@ -48,7 +46,7 @@ const GAME_DATA: RoundData[] = [
         theme: 'Futbolcular',
         options: [
             { id: 'r4-real', isReal: true, url: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&q=80' },
-            { id: 'r4-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1518605348406-03f191535736?w=400&q=80' },
+            { id: 'r4-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&q=80' },
             { id: 'r4-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&q=80' },
         ]
     }
