@@ -25,7 +25,9 @@ a:hover {
 body {
     margin: 0;
     display: flex;
-    place-items: center;
+    /* place-items: center; yerine aşağıdaki gibi yapıyoruz */
+    justify-content: center;
+    align-items: flex-start; /* İçerik uzadığında scroll edilebilsin diye */
     min-width: 320px;
     min-height: 100vh;
 }
