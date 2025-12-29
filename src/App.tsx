@@ -4,12 +4,13 @@ import './App.css'
 type ImageOption = {
     id: string
     url: string
-    isReal: boolean
+    isReal: boolean // true: Gerçek Fotoğraf, false: Yapay Zeka (AI)
 }
 
 type RoundData = {
     id: number
     theme: string
+    hint: string // İpucu metni
     options: ImageOption[]
 }
 
@@ -17,37 +18,46 @@ const GAME_DATA: RoundData[] = [
     {
         id: 1,
         theme: 'Doğa Manzarası',
+        // İpucu: AI genellikle su ve karmaşık dokularda hata yapar
+        hint: 'Yapay zeka genellikle su yüzeyindeki yansımaları ve ağaç yapraklarının karmaşık dokusunu tam olarak simüle edemez. Detaylara dikkat et.',
         options: [
-            { id: 'r1-real', isReal: true, url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80' },
-            { id: 'r1-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&q=80' },
-            { id: 'r1-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80' },
+            { id: 'r1-real1', isReal: true, url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80' },
+            { id: 'r1-real2', isReal: true, url: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&q=80' },
+            // Hedef: AI
+            { id: 'r1-ai', isReal: false, url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80' },
         ]
     },
     {
         id: 2,
         theme: 'Portre / Model',
+        hint: 'Göz bebeklerindeki yansımaların simetrisi, dişlerin yapısı ve cilt dokusunun aşırı pürüzsüzlüğü yapay zekayı ele verebilir.',
         options: [
-            { id: 'r2-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80' },
-            { id: 'r2-real', isReal: true, url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80' },
-            { id: 'r2-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80' },
+            { id: 'r2-real1', isReal: true, url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80' },
+            { id: 'r2-real2', isReal: true, url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80' },
+            // Hedef: AI
+            { id: 'r2-ai', isReal: false, url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80' },
         ]
     },
     {
         id: 3,
         theme: 'Spor Arabalar',
+        hint: 'Araba logosundaki bozulmalar, yazılardaki anlamsızlıklar veya arka plandaki objelerin (yol çizgileri vb.) tutarsızlığına bak.',
         options: [
-            { id: 'r3-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=400&q=80' },
-            { id: 'r3-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80' },
-            { id: 'r3-real', isReal: true, url: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=400&q=80' },
+            { id: 'r3-real1', isReal: true, url: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=400&q=80' },
+            { id: 'r3-real2', isReal: true, url: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=400&q=80' },
+            // Hedef AI (Mevcut resimlerden birini AI olarak işaretledik)
+            { id: 'r3-ai', isReal: false, url: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80' },
         ]
     },
     {
         id: 4,
         theme: 'Futbolcular',
+        hint: 'Formalardaki logolar, sponsor yazıları veya stadyum seyircilerinin yüzlerindeki bozulmalar en büyük ipuçlarıdır.',
         options: [
-            { id: 'r4-real', isReal: true, url: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&q=80' },
-            { id: 'r4-ai1', isReal: false, url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&q=80' },
-            { id: 'r4-ai2', isReal: false, url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&q=80' },
+            { id: 'r4-real1', isReal: true, url: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&q=80' },
+            { id: 'r4-real2', isReal: true, url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&q=80' },
+            // Hedef AI
+            { id: 'r4-ai', isReal: false, url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&q=80' },
         ]
     }
 ]
@@ -116,7 +126,9 @@ export default function App() {
     const handleSelect = (option: ImageOption) => {
         if (!isRoundOver) {
             setSelectedId(option.id)
-            if (option.isReal) {
+            // MANTIK: Yapay Zeka (isReal: false) seçilirse puan kazanır
+            // Yani option.isReal === false ise DOĞRU cevap
+            if (!option.isReal) {
                 setScore(prev => prev + 1)
             }
         }
@@ -135,7 +147,7 @@ export default function App() {
         return (
             <div style={{ padding: 40, textAlign: 'center', fontFamily: 'system-ui' }} className="fade-in">
                 <h1>Oyun Bitti! 🏁</h1>
-                <h2>Toplam Skor: <span style={{color: score > 2 ? '#28a745' : '#dc3545'}}>{score}</span> / {GAME_DATA.length}</h2>
+                <h2>Toplam Puan: <span style={{color: score > 2 ? '#28a745' : '#dc3545'}}>{score}</span> / {GAME_DATA.length}</h2>
                 <button
                     onClick={restartGame}
                     style={{
@@ -189,8 +201,8 @@ export default function App() {
             </div>
 
             <h2 style={{ marginBottom: 25, textAlign: 'center', fontSize: '1.5rem' }}>
-                <span style={{color: '#e67e22', display: 'block', fontSize: '1rem', marginBottom: 5}}>{currentRoundData.theme}</span>
-                Hangisi <span style={{textDecoration: 'underline', textDecorationColor: '#28a745'}}>GERÇEK</span>?
+                <span style={{color: '#6c757d', display: 'block', fontSize: '1rem', marginBottom: 5}}>{currentRoundData.theme}</span>
+                Hangisi <span style={{textDecoration: 'underline', textDecorationColor: '#e74c3c', color: '#e74c3c'}}>YAPAY ZEKA (AI)</span>?
             </h2>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
@@ -200,19 +212,32 @@ export default function App() {
                     let className = ''
 
                     if (isRoundOver) {
-                        if (option.isReal) {
-                            // Doğru cevap her zaman yeşil yanar
-                            borderStyle = '4px solid #28a745'
-                            overlayContent = <div style={{...overlayStyle, background: 'rgba(40, 167, 69, 0.9)'}}>GERÇEK ✅</div>
-                        } else if (option.id === selectedId && !option.isReal) {
-                            // Yanlış seçim yaptıysa kırmızı yanar ve titrer
-                            borderStyle = '4px solid #dc3545'
-                            overlayContent = <div style={{...overlayStyle, background: 'rgba(220, 53, 69, 0.9)'}}>YAPAY ZEKA 🤖</div>
-                            className = 'shake-animation'
+                        // AI (isReal: false) olan doğru cevaptır.
+                        
+                        if (!option.isReal) {
+                            // Bu SEÇENEK doğru cevap (AI)
+                            if (option.id === selectedId) {
+                                // Kullanıcı bunu seçtiyse: YEŞİL
+                                borderStyle = '4px solid #28a745'
+                                overlayContent = <div style={{...overlayStyle, background: 'rgba(40, 167, 69, 0.9)'}}>YAPAY ZEKA ✅</div>
+                            } else {
+                                // Kullanıcı seçmedi ama doğru cevap buydu: YEŞİL GÖSTER (Görmesi için)
+                                borderStyle = '4px solid #28a745'
+                                overlayContent = <div style={{...overlayStyle, background: 'rgba(40, 167, 69, 0.6)'}}>YAPAY ZEKA</div>
+                            }
                         } else {
-                            // Diğer yanlışlar sönük kalır
-                            overlayContent = <div style={{...overlayStyle, background: 'rgba(0,0,0, 0.6)'}}>YAPAY ZEKA 🤖</div>
+                            // Bu SEÇENEK gerçek fotoğraf (Yanlış cevap)
+                            if (option.id === selectedId) {
+                                // Kullanıcı bunu seçtiyse: KIRMIZI ve TİTREME
+                                borderStyle = '4px solid #dc3545'
+                                overlayContent = <div style={{...overlayStyle, background: 'rgba(220, 53, 69, 0.9)'}}>GERÇEK FOTOĞRAF 📷</div>
+                                className = 'shake-animation'
+                            } else {
+                                // Diğer gerçek fotolar sönükleşsin
+                                overlayContent = <div style={{...overlayStyle, background: 'rgba(0,0,0, 0.4)'}}>GERÇEK</div>
+                            }
                         }
+
                     } else if (selectedId === option.id) {
                         borderStyle = '4px solid #007bff'
                     }
@@ -226,7 +251,7 @@ export default function App() {
                                 ...boxBaseStyle,
                                 border: borderStyle,
                                 transform: selectedId === option.id ? 'scale(0.96)' : 'scale(1)',
-                                opacity: (isRoundOver && !option.isReal && option.id !== selectedId) ? 0.5 : 1
+                                opacity: (isRoundOver && option.isReal && option.id !== selectedId) ? 0.5 : 1 // Doğru cevaba odaklan (AI olanlar hariç diğerlerini sönükleştir)
                             }}
                         >
                             <img
@@ -244,12 +269,13 @@ export default function App() {
                 {isRoundOver ? (
                     <div className="fade-in">
                         {timeLeft === 0 && selectedId === null ? (
-                            <h3 style={{ color: '#e74c3c', margin: 0 }}>⏰ Süre doldu! Cevap veremedin.</h3>
-                        ) : shuffledOptions.find(o => o.id === selectedId)?.isReal ? (
-                            <h3 style={{ color: '#28a745', margin: 0 }}>Harika! Doğru bildin. 🎉</h3>
+                            <h3 style={{ color: '#e74c3c', margin: 0 }}>⏰ Süre doldu! Bir seçim yapamadın.</h3>
+                        ) : !shuffledOptions.find(o => o.id === selectedId)?.isReal ? (
+                            <h3 style={{ color: '#28a745', margin: 0 }}>Tebrikler! Yapay zekayı tespit ettin. 🎯</h3>
                         ) : (
-                            <h3 style={{ color: '#dc3545', margin: 0 }}>Maalesef... Bu bir yapay zeka çizimiydi! 🤖</h3>
+                            <h3 style={{ color: '#dc3545', margin: 0 }}>Maalesef... Bu gerçek bir fotoğraftı! 📸</h3>
                         )}
+                        
                         <button
                             onClick={nextRound}
                             style={{
@@ -263,7 +289,7 @@ export default function App() {
                     </div>
                 ) : (
                     <p style={{ color: '#888', fontStyle: 'italic', marginTop: 20 }}>
-                        Zaman akıyor, dikkatli seç!
+                        3 görselden biri yapay zeka tarafından üretildi. Dikkatli bak!
                     </p>
                 )}
             </div>
