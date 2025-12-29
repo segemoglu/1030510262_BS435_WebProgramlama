@@ -89,25 +89,27 @@ const overlayStyle: React.CSSProperties = {
 }
 
 type GameState = 'START' | 'PLAY' | 'FINISHED'
+type GameMode = 'NORMAL' | 'HARD' // Oyun modları
 
 export default function App() {
     const [gameState, setGameState] = useState<GameState>('START')
+    const [gameMode, setGameMode] = useState<GameMode>('NORMAL') // Varsayılan Normal
+
     const [roundIndex, setRoundIndex] = useState(0)
     const [score, setScore] = useState(0)
 
     // Oyun içi state
-    const [selectedId, setSelectedId] = useState<string | null>(null) // En son seçilen (Oyun sonlanan)
+    const [selectedId, setSelectedId] = useState<string | null>(null)
     const [shuffledOptions, setShuffledOptions] = useState<ImageOption[]>([])
-    const [timeLeft, setTimeLeft] = useState(20) // Süreyi biraz artırdık (20sn) ipucu okunabilsin diye
+    const [timeLeft, setTimeLeft] = useState(20)
 
-    // Yeni eklenenler (İpucu ve İkinci Şans için)
-    const [eliminatedIds, setEliminatedIds] = useState<string[]>([]) // Yanlış seçilip elenenler
-    const [showHint, setShowHint] = useState(false) // İpucu gösterilsin mi?
+    // Normal Mod yardımcı stateleri
+    const [eliminatedIds, setEliminatedIds] = useState<string[]>([])
+    const [showHint, setShowHint] = useState(false)
 
     const currentRoundData = GAME_DATA[roundIndex]
 
-    // Tur Bitiş Kontrolü: 
-    // Süre biterse VEYA Doğru Cevap (AI) seçilirse VEYA İkinci yanlış yapılırsa
+    // Tur Bitiş Kontrolü
     const isRoundOver = selectedId !== null || timeLeft === 0
 
     useEffect(() => {
@@ -115,11 +117,17 @@ export default function App() {
             const mixed = [...currentRoundData.options].sort(() => Math.random() - 0.5)
             setShuffledOptions(mixed)
             setSelectedId(null)
-            setEliminatedIds([]) // Sıfırla
-            setShowHint(false) // Sıfırla
-            setTimeLeft(20)
+            setEliminatedIds([])
+            setShowHint(false)
+
+            // MODA GÖRE SÜRE AYARI
+            if (gameMode === 'NORMAL') {
+                setTimeLeft(20) // Normalde 20 saniye (İpucu okunacak bol vakit)
+            } else {
+                setTimeLeft(10) // Zorda sadece 10 saniye!
+            }
         }
-    }, [gameState, roundIndex])
+    }, [gameState, roundIndex, gameMode])
 
     useEffect(() => {
         if (gameState === 'PLAY' && !isRoundOver && timeLeft > 0) {
@@ -128,7 +136,9 @@ export default function App() {
         }
     }, [gameState, timeLeft, isRoundOver])
 
-    const handleStartGame = () => {
+    // Mod seçerek başlatma
+    const handleStartGame = (mode: GameMode) => {
+        setGameMode(mode)
         setScore(0)
         setRoundIndex(0)
         setGameState('PLAY')
@@ -136,22 +146,29 @@ export default function App() {
 
     const handleSelect = (option: ImageOption) => {
         if (isRoundOver) return
-        if (eliminatedIds.includes(option.id)) return // Zaten elenmişe tıklanamaz
+        if (eliminatedIds.includes(option.id)) return
 
         if (!option.isReal) {
-            // DOĞRU CEVAP (Yapay Zeka)
+            // DOĞRU CEVAP (AI) -> Her iki modda da aynı
             setSelectedId(option.id)
             setScore(prev => prev + 1)
         } else {
-            // YANLIŞ CEVAP (Gerçek Fotoğraf)
-            if (eliminatedIds.length === 0) {
-                // İLK HATA -> İpucu Göster, Seçeneği Ele
-                setEliminatedIds(prev => [...prev, option.id])
-                setShowHint(true)
+            // YANLIŞ CEVAP (Gerçek)
+
+            if (gameMode === 'NORMAL') {
+                // --- NORMAL MOD ---
+                // İlk yanlışta ipucu ver, ikinci şans tanı
+                if (eliminatedIds.length === 0) {
+                    setEliminatedIds(prev => [...prev, option.id])
+                    setShowHint(true)
+                } else {
+                    // İkinci yanlışta oyun biter
+                    setSelectedId(option.id)
+                }
             } else {
-                // İKİNCİ HATA -> Oyun Biter
+                // --- ZOR MOD ---
+                // Hata affetmez, direkt tur biter
                 setSelectedId(option.id)
-                // Puan yok
             }
         }
     }
@@ -185,24 +202,45 @@ export default function App() {
                     <ul style={{ lineHeight: '1.6', color: '#444' }}>
                         <li>Her bölümde karşına <strong>3 görsel</strong> çıkacak.</li>
                         <li><strong>1 tanesi Yapay Zeka (AI)</strong>, diğerleri gerçek.</li>
-                        <li>Yanlış yaparsan üzülme! <strong>Bir ipucu</strong> ve <strong>ikinci şans</strong> seni bekliyor.</li>
-                        <li>Süren kısıtlı, dikkatli bak! 👀</li>
+                        <li>Görevin AI olanı bulmak!</li>
                     </ul>
                 </div>
 
-                <button
-                    onClick={handleStartGame}
-                    style={{
-                        padding: '15px 40px', fontSize: 20, fontWeight: 'bold',
-                        background: '#007bff', color: 'white', border: 'none',
-                        borderRadius: 50, cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,123,255,0.3)',
-                        transition: 'transform 0.1s'
-                    }}
-                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
-                    onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                    OYUNA BAŞLA
-                </button>
+                <div style={{ display: 'flex', gap: 20, justifyContent: 'center' }}>
+                    {/* NORMAL MOD BUTONU */}
+                    <button
+                        onClick={() => handleStartGame('NORMAL')}
+                        style={{
+                            padding: '15px 30px', fontSize: 18, fontWeight: 'bold',
+                            background: '#28a745', color: 'white', border: 'none',
+                            borderRadius: 12, cursor: 'pointer', flex: 1,
+                            boxShadow: '0 4px 10px rgba(40,167,69,0.3)'
+                        }}
+                    >
+                        NORMAL MOD
+                        <div style={{ fontSize: 12, fontWeight: 'normal', marginTop: 5, opacity: 0.9 }}>
+                            İpucu & İkinci Şans Var<br />
+                            Süre: 20 Saniye
+                        </div>
+                    </button>
+
+                    {/* ZOR MOD BUTONU */}
+                    <button
+                        onClick={() => handleStartGame('HARD')}
+                        style={{
+                            padding: '15px 30px', fontSize: 18, fontWeight: 'bold',
+                            background: '#dc3545', color: 'white', border: 'none',
+                            borderRadius: 12, cursor: 'pointer', flex: 1,
+                            boxShadow: '0 4px 10px rgba(220,53,69,0.3)'
+                        }}
+                    >
+                        ZOR MOD 🔥
+                        <div style={{ fontSize: 12, fontWeight: 'normal', marginTop: 5, opacity: 0.9 }}>
+                            İpucu YOK<br />
+                            Süre: 10 Saniye
+                        </div>
+                    </button>
+                </div>
             </div>
         )
     }
@@ -215,14 +253,18 @@ export default function App() {
                     {score === GAME_DATA.length ? '🏆' : score > GAME_DATA.length / 2 ? '😎' : '🤔'}
                 </div>
                 <h2>Toplam Puan: <span style={{ color: score > 2 ? '#28a745' : '#dc3545' }}>{score}</span> / {GAME_DATA.length}</h2>
+                <div style={{ margin: '20px 0', color: '#666' }}>
+                    Oynanan Mod: <strong>{gameMode === 'NORMAL' ? 'Normal' : 'Zor 🔥'}</strong>
+                </div>
+
                 <button
-                    onClick={handleStartGame}
+                    onClick={() => setGameState('START')}
                     style={{
                         padding: '12px 30px', fontSize: 18, background: '#007bff', color: 'white',
                         border: 'none', borderRadius: 8, cursor: 'pointer', marginTop: 20
                     }}
                 >
-                    Tekrar Oyna
+                    Ana Menüye Dön
                 </button>
             </div>
         )
@@ -239,7 +281,9 @@ export default function App() {
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
             }}>
                 <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 12, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Bölüm</div>
+                    <div style={{ fontSize: 12, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>
+                        {gameMode === 'NORMAL' ? 'Normal Mod' : '🔥 Zor Mod'}
+                    </div>
                     <div style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>{roundIndex + 1} / {GAME_DATA.length}</div>
                 </div>
 
@@ -295,7 +339,7 @@ export default function App() {
                     } else {
                         // Oyun Devam Ediyor
                         if (isEliminated) {
-                            // Elenen şık (İlk yanlış)
+                            // Elenen şık (Sadece Normal Modda olur)
                             opacity = 0.4
                             borderStyle = '4px solid #ccc'
                             overlayContent = <div style={{ ...overlayStyle, background: 'rgba(0,0,0,0.5)' }}>YANLIŞ ❌</div>
@@ -325,8 +369,8 @@ export default function App() {
                 })}
             </div>
 
-            {/* İPUCU KUTUSU */}
-            {showHint && !isRoundOver && (
+            {/* İPUCU KUTUSU (Sadece Normal Modda ve Gösterilecekse) */}
+            {showHint && !isRoundOver && gameMode === 'NORMAL' && (
                 <div className="fade-in" style={{
                     marginTop: 20, padding: 15, background: '#fff3cd', color: '#856404',
                     borderRadius: 8, border: '1px solid #ffeeba', maxWidth: 600, marginInline: 'auto'
